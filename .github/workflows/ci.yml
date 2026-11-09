@@ -1,4 +1,4 @@
-name: CI & Docker Build Check
+name: CI, Tests & Docker Build Check
 
 on:
   push:
@@ -7,12 +7,13 @@ on:
     branches: [main, master]
 
 jobs:
-  lint-and-build:
-    name: Lint, Typecheck & Next.js Build
+  lint-test-and-build:
+    name: Lint, Test, Typecheck & Next.js Build
     runs-on: ubuntu-latest
 
     env:
       DATABASE_URL: "file:./dev.db"
+      ADMIN_SECRET_KEY: "ci-test-secret-key-32-chars-min-len"
 
     steps:
       - name: Checkout Code
@@ -27,16 +28,24 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Generate Prisma Client
-        run: npx prisma generate
+      - name: Generate Prisma Client & Sync DB
+        run: |
+          npx prisma generate
+          npx prisma db push --accept-data-loss
 
-      - name: Type Check & Build
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: ESLint Check
+        run: npm run lint
+
+      - name: Type Check & Next.js Production Build
         run: npm run build
 
   docker-build:
     name: Verify Multi-Stage Dockerfile
     runs-on: ubuntu-latest
-    needs: lint-and-build
+    needs: lint-test-and-build
 
     steps:
       - name: Checkout Code
@@ -51,6 +60,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: false
-          tags: devops-club-portal:latest
+          tags: nexops-portal:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { siteConfig } from "@/config/site";
-import { Terminal, Menu, X, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { useMotionPreference } from "@/contexts/MotionContext";
+import { Terminal, Menu, X, ArrowRight, Zap, ZapOff } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { reduce3D, toggleReduce3D } = useMotionPreference();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md">
@@ -21,8 +23,8 @@ export function Navbar() {
           <div className="flex flex-col">
             <span className="font-bold text-sm tracking-tight text-zinc-100 flex items-center gap-1.5">
               {siteConfig.name}
-              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/30">
-                v2.0
+              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/30">
+                SIET
               </span>
             </span>
             <span className="text-[11px] text-zinc-400 truncate max-w-[200px] sm:max-w-none">
@@ -51,13 +53,28 @@ export function Navbar() {
           })}
         </nav>
 
-        {/* Actions & Join CTA */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Actions, Reduce 3D Toggle & Join CTA */}
+        <div className="hidden md:flex items-center gap-2.5">
+          {/* Reduce 3D / Low Effects Toggle */}
+          <button
+            onClick={toggleReduce3D}
+            type="button"
+            title={reduce3D ? "3D effects reduced (Click to enable full 3D)" : "Full 3D effects enabled (Click to reduce)"}
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-mono transition ${
+              reduce3D
+                ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            {reduce3D ? <ZapOff className="h-3.5 w-3.5" /> : <Zap className="h-3.5 w-3.5 text-cyan-400" />}
+            <span className="text-[11px]">{reduce3D ? "3D Off" : "3D On"}</span>
+          </button>
+
           <Link
             href="/join"
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-xs lg:text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 active:scale-95 shadow-md shadow-emerald-500/20"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-4 py-2 text-xs lg:text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400 active:scale-95 shadow-md shadow-emerald-500/20"
           >
-            <span>Join Club</span>
+            <span>Join NexOps</span>
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
@@ -96,20 +113,32 @@ export function Navbar() {
             })}
           </div>
           <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col gap-2">
+            <button
+              onClick={toggleReduce3D}
+              type="button"
+              className={`flex items-center justify-center gap-2 rounded-lg border py-2 text-xs font-mono ${
+                reduce3D
+                  ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                  : "border-zinc-800 bg-zinc-900 text-zinc-300"
+              }`}
+            >
+              {reduce3D ? <ZapOff className="h-3.5 w-3.5" /> : <Zap className="h-3.5 w-3.5 text-cyan-400" />}
+              <span>{reduce3D ? "3D Effects: Minimal / Paused" : "3D Effects: Full Hardware Accel"}</span>
+            </button>
             <Link
               href="/join"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
             >
-              <span>Join the Club</span>
+              <span>Join NexOps</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              href="/contact"
+              href="/admin"
               onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-800"
+              className="flex items-center justify-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-mono text-zinc-400 hover:text-zinc-200"
             >
-              Community Discord / Chat
+              Admin Control Plane
             </Link>
           </div>
         </div>
@@ -117,4 +146,3 @@ export function Navbar() {
     </header>
   );
 }
-

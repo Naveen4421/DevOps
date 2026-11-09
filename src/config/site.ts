@@ -7,6 +7,7 @@ export interface SiteConfig {
     name: string;
     department: string;
     campus: string;
+    city: string;
   };
   contact: {
     email: string;
@@ -29,24 +30,25 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  name: "Cloud & DevOps Club",
-  shortName: "CDC",
-  tagline: "Bridging the gap between code and infrastructure.",
+  name: "NexOps",
+  shortName: "NexOps",
+  tagline: "Build it. Connect it. Deploy it.",
   description:
-    "The premier student-led technical community focused on Cloud Computing, Computer Networking, Systems Engineering, and modern DevOps practices.",
+    "The premier student-led technical society for Cloud Computing, Computer Networking, Systems Engineering, and modern DevOps practices at SIET Tumakuru.",
   college: {
-    name: "Apex Institute of Technology",
+    name: "Shridevi Institute of Engineering and Technology (SIET)",
     department: "Department of Computer Science & Engineering",
-    campus: "Main Campus, Innovation Wing",
+    campus: "NH-4, Sira Road",
+    city: "Tumakuru, Karnataka 572106",
   },
   contact: {
-    email: "devops-club@college.edu",
-    discord: "https://discord.gg/devops-club",
-    whatsapp: "https://chat.whatsapp.com/sample-invite-code",
-    linkedin: "https://linkedin.com/company/devops-club",
-    github: "https://github.com/cloud-devops-club",
-    instagram: "https://instagram.com/devops_club",
-    x: "https://x.com/devops_club",
+    email: "nexops.siet@gmail.com",
+    discord: "https://discord.gg/nexops-siet",
+    whatsapp: "https://chat.whatsapp.com/nexops-community",
+    linkedin: "https://linkedin.com/company/nexops-siet",
+    github: "https://github.com/Naveen4421/DevOps",
+    instagram: "https://instagram.com/nexops_siet",
+    x: "https://x.com/nexops_siet",
   },
   nav: [
     { title: "Home", href: "/" },
@@ -58,10 +60,9 @@ export const siteConfig: SiteConfig = {
     { title: "Contact", href: "/contact" },
   ],
   stats: [
-    { label: "Active Members", value: "350+", description: "Students actively learning & building" },
-    { label: "Workshops & CTFs", value: "24+", description: "Hands-on labs and tech sessions" },
-    { label: "Open-Source Projects", value: "12+", description: "Production-ready tools built by members" },
-    { label: "Placements & Interns", value: "45+", description: "In Cloud, SRE, and Infrastructure roles" },
+    { label: "Active Members", value: "250+", description: "Students actively learning & building" },
+    { label: "Workshops & CTFs", value: "18+", description: "Hands-on labs and technical sessions" },
+    { label: "Open-Source Projects", value: "10+", description: "Production tools built by members" },
+    { label: "Placements & Interns", value: "35+", description: "In Cloud, SRE, and Infrastructure roles" },
   ],
 };
-

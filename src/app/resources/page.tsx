@@ -9,7 +9,6 @@ import {
   Server,
   Layers,
   GitMerge,
-  BookOpen,
   ExternalLink,
   ChevronRight,
   CheckCircle2,

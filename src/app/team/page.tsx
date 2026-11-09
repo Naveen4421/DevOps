@@ -1,21 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { teamData } from "@/data/team";
-import { siteConfig } from "@/config/site";
-import { Mail, Shield, Sparkles, Terminal, ArrowRight } from "lucide-react";
+import { Mail, Sparkles, ArrowRight } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/Icons";
 import Link from "next/link";
 
+type CategoryFilter = "all" | "faculty" | "leads" | "core";
+
+interface CategoryOption {
+  label: string;
+  value: CategoryFilter;
+}
+
 export default function TeamPage() {
-  const [filter, setFilter] = useState<"all" | "faculty" | "leads" | "core">("all");
+  const [filter, setFilter] = useState<CategoryFilter>("all");
 
   const filteredMembers =
     filter === "all"
       ? teamData
       : teamData.filter((member) => member.category === filter);
 
-  const categories = [
+  const categories: CategoryOption[] = [
     { label: "Everyone", value: "all" },
     { label: "Faculty Coordinators", value: "faculty" },
     { label: "Student Leads", value: "leads" },
@@ -35,7 +42,7 @@ export default function TeamPage() {
         </h1>
         <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
           Faculty mentors, student leads, and enthusiastic engineers who organize labs,
-          maintain cluster infrastructure, and teach weekly workshops.
+          maintain cluster infrastructure, and teach weekly workshops at SIET.
         </p>
       </div>
 
@@ -44,7 +51,7 @@ export default function TeamPage() {
         {categories.map((cat) => (
           <button
             key={cat.value}
-            onClick={() => setFilter(cat.value as any)}
+            onClick={() => setFilter(cat.value)}
             className={`rounded-lg px-4 py-2 text-xs font-semibold transition-all ${
               filter === cat.value
                 ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
@@ -65,14 +72,16 @@ export default function TeamPage() {
           >
             {/* Member Photo */}
             <div className="relative h-56 w-full overflow-hidden bg-zinc-950">
-              <img
+              <Image
                 src={member.photoUrl}
                 alt={member.name}
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/30 to-transparent" />
               {member.track && (
-                <span className="absolute top-3 left-3 rounded bg-zinc-900/90 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-mono text-emerald-400 backdrop-blur-md">
+                <span className="absolute top-3 left-3 rounded bg-zinc-900/90 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-mono text-emerald-400 backdrop-blur-md z-10">
                   {member.track}
                 </span>
               )}

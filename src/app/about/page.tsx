@@ -4,12 +4,8 @@ import {
   ShieldCheck,
   Terminal,
   Server,
-  Cpu,
-  Layers,
   HeartHandshake,
-  Compass,
   ArrowRight,
-  School,
   Building2,
 } from "lucide-react";
 
@@ -169,7 +165,7 @@ export default function AboutPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-          {milestones.map((m, idx) => (
+          {milestones.map((m) => (
             <div
               key={m.year}
               className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 space-y-3 relative"

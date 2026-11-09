@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
-import { Terminal, Mail, Heart, Activity } from "lucide-react";
+import { Terminal, Mail } from "lucide-react";
 import { GithubIcon, LinkedinIcon, DiscordIcon } from "@/components/Icons";
 
 export function Footer() {

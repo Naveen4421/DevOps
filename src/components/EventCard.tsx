@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { EventItem } from "@/types";
-import { Calendar, Clock, MapPin, ExternalLink, UserCheck, CalendarPlus } from "lucide-react";
+import { Calendar, Clock, MapPin, UserCheck, CalendarPlus } from "lucide-react";
 
 interface EventCardProps {
   event: EventItem;
@@ -25,10 +26,12 @@ export function EventCard({ event, onRegister }: EventCardProps) {
       {/* Event Banner */}
       <div className="relative h-48 w-full overflow-hidden bg-zinc-950">
         {event.posterImage ? (
-          <img
+          <Image
             src={event.posterImage}
             alt={event.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-85"
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-85"
           />
         ) : (
           <div className="h-full w-full bg-gradient-to-tr from-emerald-950 to-zinc-900 flex items-center justify-center">

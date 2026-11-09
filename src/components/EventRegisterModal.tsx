@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { EventItem } from "@/types";
-import { X, CheckCircle, Calendar, MapPin, User, Mail, Sparkles, Loader2 } from "lucide-react";
+import { X, CheckCircle, Calendar, Sparkles, Loader2 } from "lucide-react";
 
 interface EventRegisterModalProps {
   event: EventItem | null;

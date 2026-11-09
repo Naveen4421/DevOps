@@ -5,14 +5,11 @@ import { siteConfig } from "@/config/site";
 import {
   Sparkles,
   CheckCircle2,
-  ArrowRight,
-  Terminal,
   ShieldCheck,
   Send,
   Loader2,
-  Users,
-  Compass,
 } from "lucide-react";
+import { useTurnstile } from "@/hooks/useTurnstile";
 
 export default function JoinPage() {
   const [formData, setFormData] = useState({
@@ -30,6 +27,8 @@ export default function JoinPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const turnstile = useTurnstile();
 
   const steps = [
     {
@@ -57,21 +56,26 @@ export default function JoinPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage("");
 
     try {
       const res = await fetch("/api/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          turnstileToken: turnstile.token,
+        }),
       });
 
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setSubmitted(true);
+      } else {
+        setErrorMessage(data.message || "Failed to submit application. Please check your fields.");
       }
-    } catch (err) {
-      console.error(err);
-      // Fallback optimistic success
-      setSubmitted(true);
+    } catch {
+      setErrorMessage("Network error connecting to the registration server. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -226,6 +230,11 @@ export default function JoinPage() {
                   <p className="text-xs text-zinc-400">
                     Takes less than 3 minutes. All fields marked with * are required.
                   </p>
+                  {errorMessage && (
+                    <div className="mt-3 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-xs text-rose-300 font-mono">
+                      {errorMessage}
+                    </div>
+                  )}
                 </div>
 
                 {/* Name & Email */}

@@ -1,7 +1,8 @@
-// Prisma schema for Cloud & DevOps Club Portal
+// Prisma schema for NexOps Portal (SIET Tumakuru)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -12,7 +13,7 @@ datasource db {
 model MemberApplication {
   id              String   @id @default(cuid())
   fullName        String
-  email           String
+  email           String   @unique
   phone           String?
   studentId       String
   year            String
@@ -40,6 +41,7 @@ model EventRegistration {
   status     String   @default("confirmed") // confirmed, attended, cancelled
   createdAt  DateTime @default(now())
 
+  @@unique([eventId, email])
   @@index([eventId])
   @@index([email])
 }
@@ -53,4 +55,3 @@ model ContactMessage {
   status    String   @default("unread") // unread, replied, archived
   createdAt DateTime @default(now())
 }
-

@@ -5,7 +5,7 @@ import { eventsData } from "@/data/events";
 import { EventCard } from "@/components/EventCard";
 import { EventRegisterModal } from "@/components/EventRegisterModal";
 import { EventItem } from "@/types";
-import { Calendar, Search, Filter, Sparkles } from "lucide-react";
+import { Calendar, Search, Filter } from "lucide-react";
 
 export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);

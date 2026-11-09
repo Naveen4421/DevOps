@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Terminal, Copy, Check, Server, Shield, Activity } from "lucide-react";
+import { Copy, Check, Activity } from "lucide-react";
 
 export function TerminalHero() {
   const [copied, setCopied] = useState(false);
-  const command = "curl -sSL https://devopsclub.sh/join | bash";
+  const command = "curl -sSL https://nexops.siet.edu/join | bash";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(command);

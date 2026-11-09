@@ -1,8 +1,8 @@
-# Multi-stage production Dockerfile for Cloud & DevOps Club Website
+# Multi-stage production Dockerfile for NexOps Portal (SIET Tumakuru)
 # Stage 1: Base image
 FROM node:20-alpine AS base
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
 # Stage 2: Install dependencies
 FROM base AS deps
@@ -20,7 +20,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV DATABASE_URL="file:./dev.db"
 
-# Generate Prisma Client for the production container
+# Generate Prisma Client for the production container with musl OpenSSL 3.0.x engine
 RUN npx prisma generate
 
 RUN npm run build
@@ -50,6 +50,6 @@ USER nextjs
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 CMD ["node", "server.js"]

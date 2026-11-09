@@ -1,53 +1,75 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { memberApplicationSchema } from "@/lib/validations";
+import { emailService } from "@/lib/mail";
+import { isAuthorizedAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const json = await request.json();
+    const result = memberApplicationSchema.safeParse(json);
 
-    const {
-      fullName,
-      email,
-      phone,
-      studentId,
-      year,
-      branch,
-      track,
-      experienceLevel,
-      githubUrl,
-      motivation,
-    } = body;
-
-    if (!fullName || !email || !studentId || !motivation) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields." },
+        {
+          success: false,
+          message: "Validation failed. Please review your input.",
+          errors: result.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
 
-    // Save directly to live database
+    const data = result.data;
+
+    // Check duplicate email
+    const existing = await prisma.memberApplication.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "An application with this email address has already been submitted.",
+          isDuplicate: true,
+        },
+        { status: 409 }
+      );
+    }
+
     const application = await prisma.memberApplication.create({
       data: {
-        fullName,
-        email,
-        phone: phone || null,
-        studentId,
-        year: year || "1st Year",
-        branch: branch || "CSE",
-        track: track || "DevOps & CI/CD",
-        experienceLevel: experienceLevel || "Curious Beginner",
-        githubUrl: githubUrl || null,
-        motivation,
+        fullName: data.fullName,
+        email: data.email,
+        phone: data.phone || null,
+        studentId: data.studentId,
+        year: data.year,
+        branch: data.branch,
+        track: data.track,
+        experienceLevel: data.experienceLevel,
+        githubUrl: data.githubUrl || null,
+        motivation: data.motivation,
       },
     });
 
+    // Sanitized server log (no full payload)
+    const domain = data.email.split("@")[1] || "unknown";
+    console.log(`[API:Join] Application received for track: ${data.track} | Domain: @${domain}`);
+
+    // Trigger confirmation notification
+    await emailService.sendApplicationConfirmation(data.email, data.fullName, data.track);
+
     return NextResponse.json({
       success: true,
-      message: "Application submitted successfully! Your application is in the queue.",
-      data: application,
+      message: "Application submitted successfully! Check your email for next steps.",
+      data: {
+        id: application.id,
+        track: application.track,
+      },
     });
   } catch (error) {
-    console.error("Error creating member application:", error);
+    console.error("[API:Join] Submission error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { success: false, message: "Internal server error while saving application." },
       { status: 500 }
@@ -57,13 +79,10 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const secret = searchParams.get("secret");
-
-    // Optional admin access check
-    if (process.env.ADMIN_SECRET_KEY && secret !== process.env.ADMIN_SECRET_KEY) {
+    const authorized = await isAuthorizedAdmin(request);
+    if (!authorized) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized." },
+        { success: false, message: "Unauthorized. Admin session required." },
         { status: 401 }
       );
     }
@@ -78,7 +97,7 @@ export async function GET(request: Request) {
       data: applications,
     });
   } catch (error) {
-    console.error("Error fetching applications:", error);
+    console.error("[API:Join] Query error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { success: false, message: "Failed to fetch applications." },
       { status: 500 }

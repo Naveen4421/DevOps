@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { MotionProvider } from "@/contexts/MotionContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   keywords: [
+    "NexOps",
     "DevOps",
     "Cloud Computing",
     "Kubernetes",
@@ -29,14 +31,15 @@ export const metadata: Metadata = {
     "Computer Networks",
     "CI/CD",
     "Terraform",
+    "SIET Tumakuru",
     "Student Tech Club",
   ],
-  authors: [{ name: siteConfig.name }],
+  authors: [{ name: `${siteConfig.name} - ${siteConfig.college.name}` }],
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://devopsclub.edu",
-    title: siteConfig.name,
+    url: "https://nexops-siet.edu",
+    title: `${siteConfig.name} - ${siteConfig.tagline}`,
     description: siteConfig.description,
     siteName: siteConfig.name,
   },
@@ -53,9 +56,11 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100 selection:bg-emerald-500 selection:text-zinc-950">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <MotionProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </MotionProvider>
       </body>
     </html>
   );

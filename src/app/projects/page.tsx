@@ -2,16 +2,12 @@
 
 import { useState } from "react";
 import { projectsData } from "@/data/projects";
-import { ProjectItem } from "@/types";
 import {
   Code2,
   ExternalLink,
-  Layers,
   Star,
   Search,
-  Filter,
   ArrowRight,
-  Terminal,
 } from "lucide-react";
 import { GithubIcon } from "@/components/Icons";
 import Link from "next/link";

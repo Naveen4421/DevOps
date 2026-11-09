@@ -1,23 +1,34 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { eventRegistrationSchema } from "@/lib/validations";
+import { emailService } from "@/lib/mail";
+import { isAuthorizedAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { eventId, eventTitle, fullName, email, studentId, branch } = body;
+    const json = await request.json();
+    const result = eventRegistrationSchema.safeParse(json);
 
-    if (!eventId || !fullName || !email || !studentId) {
+    if (!result.success) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields." },
+        {
+          success: false,
+          message: "Validation failed. Please verify your details.",
+          errors: result.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
 
-    // Check if student is already registered for this event
-    const existing = await prisma.eventRegistration.findFirst({
+    const { eventId, eventTitle, fullName, email, studentId, branch } = result.data;
+
+    // Check duplicate RSVP
+    const existing = await prisma.eventRegistration.findUnique({
       where: {
-        eventId,
-        email,
+        eventId_email: {
+          eventId,
+          email,
+        },
       },
     });
 
@@ -25,7 +36,6 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         message: "You are already registered for this event!",
-        data: existing,
         alreadyRegistered: true,
       });
     }
@@ -33,22 +43,29 @@ export async function POST(request: Request) {
     const registration = await prisma.eventRegistration.create({
       data: {
         eventId,
-        eventTitle: eventTitle || "Club Workshop",
+        eventTitle,
         fullName,
         email,
         studentId,
-        branch: branch || "CSE",
+        branch,
         status: "confirmed",
       },
     });
 
+    // Sanitized server log
+    const domain = email.split("@")[1] || "unknown";
+    console.log(`[API:Events] RSVP recorded for event: ${eventId} | Domain: @${domain}`);
+
+    // Trigger confirmation notification
+    await emailService.sendEventRsvpConfirmation(email, fullName, eventTitle);
+
     return NextResponse.json({
       success: true,
       message: "RSVP confirmed successfully!",
-      data: registration,
+      data: { id: registration.id },
     });
   } catch (error) {
-    console.error("Error creating event registration:", error);
+    console.error("[API:Events] Registration error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { success: false, message: "Failed to record event registration." },
       { status: 500 }
@@ -58,18 +75,18 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const eventId = searchParams.get("eventId");
-    const secret = searchParams.get("secret");
-
-    if (process.env.ADMIN_SECRET_KEY && secret !== process.env.ADMIN_SECRET_KEY) {
+    const authorized = await isAuthorizedAdmin(request);
+    if (!authorized) {
       return NextResponse.json(
-        { success: false, message: "Unauthorized." },
+        { success: false, message: "Unauthorized. Admin session required." },
         { status: 401 }
       );
     }
 
+    const { searchParams } = new URL(request.url);
+    const eventId = searchParams.get("eventId");
     const where = eventId ? { eventId } : {};
+
     const registrations = await prisma.eventRegistration.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -81,11 +98,10 @@ export async function GET(request: Request) {
       data: registrations,
     });
   } catch (error) {
-    console.error("Error fetching registrations:", error);
+    console.error("[API:Events] Query error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
       { success: false, message: "Failed to fetch event registrations." },
       { status: 500 }
     );
   }
 }
-

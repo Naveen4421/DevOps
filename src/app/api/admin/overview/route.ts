@@ -1,23 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { isAuthorizedAdmin } from "@/lib/auth";
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const secret = searchParams.get("secret");
-
-    // Check optional admin secret if configured
-    if (process.env.ADMIN_SECRET_KEY && secret && secret !== process.env.ADMIN_SECRET_KEY) {
+    const authorized = await isAuthorizedAdmin(request);
+    if (!authorized) {
       return NextResponse.json(
-        { success: false, message: "Invalid admin key." },
+        { success: false, message: "Unauthorized. Valid admin session cookie required." },
         { status: 401 }
       );
     }
 
     const [applications, registrations, messages] = await Promise.all([
-      prisma.memberApplication.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
-      prisma.eventRegistration.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
-      prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
+      prisma.memberApplication.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
+      prisma.eventRegistration.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
+      prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
     ]);
 
     return NextResponse.json({
@@ -34,11 +32,10 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Error fetching admin overview:", error);
+    console.error("[API:AdminOverview] Query error:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json(
-      { success: false, message: "Database query error." },
+      { success: false, message: "Failed to retrieve dashboard records." },
       { status: 500 }
     );
   }
 }
-
